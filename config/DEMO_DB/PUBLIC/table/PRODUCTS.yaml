@@ -16,6 +16,9 @@ columns:
     type: TIMESTAMP_NTZ(9)
     not_null: true
     comment: "Record creation timestamp"
+  STOCK_QTY:
+    type: NUMBER(10,0)
+    comment: "Available stock quantity"
 
 primary_key:
   - PRODUCT_ID
