@@ -1,0 +1,47 @@
+name: SnowDDL Deploy
+
+on:
+  push:
+    branches:
+      - dev
+      - qa
+      - preprod
+      - main
+
+jobs:
+  snowddl-apply:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install SnowDDL
+        run: pip install snowddl
+
+      - name: Set environment prefix
+        run: |
+          if [ "${{ github.ref_name }}" == "dev" ]; then
+            echo "ENV_PREFIX=DEV" >> $GITHUB_ENV
+          elif [ "${{ github.ref_name }}" == "qa" ]; then
+            echo "ENV_PREFIX=QA" >> $GITHUB_ENV
+          elif [ "${{ github.ref_name }}" == "preprod" ]; then
+            echo "ENV_PREFIX=PREPROD" >> $GITHUB_ENV
+          elif [ "${{ github.ref_name }}" == "main" ]; then
+            echo "ENV_PREFIX=PRD" >> $GITHUB_ENV
+          fi
+
+      - name: Run SnowDDL Apply
+        run: |
+          snowddl \
+            -c config \
+            -a ${{ secrets.SNOWFLAKE_ACCOUNT }} \
+            -u ${{ secrets.SNOWFLAKE_USER }} \
+            -p ${{ secrets.SNOWFLAKE_PASSWORD }} \
+            --env-prefix $ENV_PREFIX \
+            apply
